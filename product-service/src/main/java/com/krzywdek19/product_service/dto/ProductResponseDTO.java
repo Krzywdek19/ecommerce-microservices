@@ -1,7 +1,6 @@
 package com.krzywdek19.product_service.dto;
 
-import com.krzywdek19.product_service.Category;
-import lombok.AllArgsConstructor;
+import com.krzywdek19.product_service.model.Category;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,4 +14,6 @@ public class ProductResponseDTO {
     private String description;
     private BigDecimal price;
     private Category category;
+    private String skuCode;
+    private Integer quantity;
 }

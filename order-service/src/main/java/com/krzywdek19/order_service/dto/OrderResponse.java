@@ -1,24 +1,23 @@
 package com.krzywdek19.order_service.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderResponse {
+    private Long id;
     private String orderNumber;
-    private Instant orderDate;
+    private LocalDateTime orderDate;
     private String status;
+    private BigDecimal totalAmount;
     private List<OrderLineItemResponse> orderLineItems;
-
-    @Getter
-    @Setter
-    public static class OrderLineItemResponse {
-        private String skuCode;
-        private int quantity;
-        private double price;
-    }
 }

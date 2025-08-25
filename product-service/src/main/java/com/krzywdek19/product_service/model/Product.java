@@ -1,9 +1,10 @@
-package com.krzywdek19.product_service;
+package com.krzywdek19.product_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -20,4 +21,13 @@ public class Product {
     private String name;
     private BigDecimal  price;
     private String description;
+    private String skuCode;
+    private Integer quantity;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

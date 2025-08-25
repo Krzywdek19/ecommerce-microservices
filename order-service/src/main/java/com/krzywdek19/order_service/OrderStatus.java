@@ -1,7 +1,8 @@
 package com.krzywdek19.order_service;
 
-public enum Status {
+public enum OrderStatus {
     PENDING,
     CONFIRMED,
-    CANCELLED
+    CANCELLED,
+    COMPLETED,
 }

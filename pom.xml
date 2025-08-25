@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.krzywdek19</groupId>
-  <artifactId>eccomerce-microservices</artifactId>
+  <artifactId>ecommerce-microservices</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
 
@@ -15,7 +15,7 @@
     <spring.boot.version>3.3.0</spring.boot.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <lombok.version>1.18.32</lombok.version>
-    <spring-cloud.version>2023.0.0</spring-cloud.version>
+    <spring-cloud.version>2023.0.4</spring-cloud.version>
     <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -35,16 +35,6 @@
         <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-openfeign-core</artifactId>
-        <version>${openfeign-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-openfeign</artifactId>
-        <version>${openfeign-version}</version>
       </dependency>
       <dependency>
         <groupId>org.mapstruct</groupId>
@@ -106,5 +96,7 @@
   <modules>
     <module>product-service</module>
     <module>order-service</module>
+    <module>discovery-server</module>
+    <module>gateway-service</module>
   </modules>
 </project>
