@@ -1,29 +1,26 @@
 package com.krzywdek19.product_service.service;
 
 import com.krzywdek19.product_service.model.Category;
-import com.krzywdek19.product_service.model.Product;
 import com.krzywdek19.product_service.dto.ProductCreateDTO;
 import com.krzywdek19.product_service.dto.ProductResponseDTO;
 import com.krzywdek19.product_service.dto.ProductUpdateDTO;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
-    //basic CRUD operations
-    Product createProduct(ProductCreateDTO product);
-    Product updateProduct(Long id, ProductUpdateDTO product);
+    ProductResponseDTO createProduct(ProductCreateDTO product);
+    ProductResponseDTO updateProduct(Long id, ProductUpdateDTO product);
     ProductResponseDTO getProduct(Long id);
-    List<ProductResponseDTO> getProducts();
+    Page<ProductResponseDTO> getProducts(int page, int size);
     void deleteProduct(Long id);
-
-    //logic operations
-    List<ProductResponseDTO> getProductsByCategory(Category category);
-    List<ProductResponseDTO> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice);
+    Page<ProductResponseDTO> getProductsByCategory(Category category, int page, int size);
+    Page<ProductResponseDTO> getProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, int page, int size);
     boolean isProductInStock(Long id);
     boolean reduceProductStock(Long id, Integer quantity);
-    List<ProductResponseDTO> searchProducts(String keyword);
+    Page<ProductResponseDTO> searchProducts(String keyword, int page, int size);
     List<ProductResponseDTO> getRecentlyAddedProducts(int limit);
     boolean checkProductAvailability(List<Long> productIds);
-    List<Product> getProductsByIds(List<Long> productIds);
+    List<ProductResponseDTO> getProductsByIds(List<Long> productIds);
 }

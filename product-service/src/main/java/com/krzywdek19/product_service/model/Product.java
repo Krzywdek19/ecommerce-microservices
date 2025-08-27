@@ -19,15 +19,21 @@ public class Product {
     @Enumerated(value = EnumType.STRING)
     private Category category;
     private String name;
-    private BigDecimal  price;
+    private BigDecimal price;
     private String description;
     private String skuCode;
     private Integer quantity;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
