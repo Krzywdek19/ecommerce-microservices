@@ -2,6 +2,7 @@ package com.krzywdek19.product_service.controller;
 
 import com.krzywdek19.product_service.dto.ProductCreateDTO;
 import com.krzywdek19.product_service.dto.ProductResponseDTO;
+import com.krzywdek19.product_service.dto.ProductStockResponse;
 import com.krzywdek19.product_service.dto.ProductUpdateDTO;
 import com.krzywdek19.product_service.model.Category;
 import com.krzywdek19.product_service.service.ProductService;
@@ -142,14 +143,14 @@ public class ProductController {
     }
 
     @PostMapping("/check-availability")
-    @Operation(summary = "Check product availability", description = "Checks if all specified products are available")
+    @Operation(summary = "Check product availability", description = "Returns detailed availability information for each product")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully checked availability"),
             @ApiResponse(responseCode = "404", description = "One or more products not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> checkProductAvailability(@RequestBody List<Long> productIds) {
-        return ResponseEntity.ok(productService.checkProductAvailability(productIds));
+    public ResponseEntity<List<ProductStockResponse>> checkProductsAvailability(@RequestBody List<Long> productIds) {
+        return ResponseEntity.ok(productService.checkProductsAvailability(productIds));
     }
 
     @PostMapping("/batch")

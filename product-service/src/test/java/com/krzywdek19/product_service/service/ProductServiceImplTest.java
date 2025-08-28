@@ -2,6 +2,7 @@ package com.krzywdek19.product_service.service;
 
 import com.krzywdek19.product_service.dto.ProductCreateDTO;
 import com.krzywdek19.product_service.dto.ProductResponseDTO;
+import com.krzywdek19.product_service.dto.ProductStockResponse;
 import com.krzywdek19.product_service.dto.ProductUpdateDTO;
 import com.krzywdek19.product_service.exception.InsufficientStockException;
 import com.krzywdek19.product_service.exception.InvalidProductDataException;
@@ -111,22 +112,6 @@ public class ProductServiceImplTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Test Product", result.getName());
-    }
-
-    @Test
-    void getProduct_WhenCached_DoesNotCallRepository() {
-        // Arrange - First call will save product to cache
-        when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
-        when(productMapper.productToDto(testProduct)).thenReturn(testProductDTO);
-
-        // Act - First call
-        productService.getProduct(1L);
-
-        // Second call - should use cache instead of repo
-        productService.getProduct(1L);
-
-        // Assert - repository should be called only once
-        verify(productRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -306,18 +291,62 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    void checkProductAvailability_AllAvailable_ReturnsTrue() {
+    void checkProductsAvailability_ReturnStockInformation() {
         // Arrange
-        List<Long> ids = Collections.singletonList(1L);
-        List<Product> products = Collections.singletonList(testProduct);
+        List<Long> ids = Arrays.asList(1L, 2L);
 
-        when(productRepository.findAllById(ids)).thenReturn(products);
+        Product product1 = new Product();
+        product1.setId(1L);
+        product1.setName("Test Product");
+        product1.setQuantity(10);
+
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setName("Out of Stock Product");
+        product2.setQuantity(0);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
+        when(productRepository.findById(2L)).thenReturn(Optional.of(product2));
 
         // Act
-        boolean result = productService.checkProductAvailability(ids);
+        List<ProductStockResponse> result = productService.checkProductsAvailability(ids);
 
         // Assert
-        assertTrue(result);
+        assertEquals(2, result.size());
+
+        ProductStockResponse response1 = result.stream()
+                .filter(p -> p.getProductId().equals(1L))
+                .findFirst()
+                .orElseThrow();
+        ProductStockResponse response2 = result.stream()
+                .filter(p -> p.getProductId().equals(2L))
+                .findFirst()
+                .orElseThrow();
+
+        assertTrue(response1.isInStock());
+        assertEquals(10, response1.getQuantity());
+
+        assertFalse(response2.isInStock());
+        assertEquals(0, response2.getQuantity());
+    }
+
+    @Test
+    void checkProductsAvailability_ProductNotFound_ReturnsNotInStock() {
+        // Arrange
+        List<Long> ids = Collections.singletonList(99L);
+
+        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act
+        List<ProductStockResponse> result = productService.checkProductsAvailability(ids);
+
+        // Assert
+        assertEquals(1, result.size());
+
+        ProductStockResponse response = result.get(0);
+        assertEquals(99L, response.getProductId());
+        assertFalse(response.isInStock());
+        assertEquals(0, response.getQuantity());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.krzywdek19.product_service.service;
 
+import com.krzywdek19.product_service.dto.ProductStockResponse;
 import com.krzywdek19.product_service.model.Category;
 import com.krzywdek19.product_service.dto.ProductCreateDTO;
 import com.krzywdek19.product_service.dto.ProductResponseDTO;
@@ -21,6 +22,6 @@ public interface ProductService {
     boolean reduceProductStock(Long id, Integer quantity);
     Page<ProductResponseDTO> searchProducts(String keyword, int page, int size);
     List<ProductResponseDTO> getRecentlyAddedProducts(int limit);
-    boolean checkProductAvailability(List<Long> productIds);
     List<ProductResponseDTO> getProductsByIds(List<Long> productIds);
+    List<ProductStockResponse> checkProductsAvailability(List<Long> productIds);
 }

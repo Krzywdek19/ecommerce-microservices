@@ -1,5 +1,6 @@
 package com.krzywdek19.product_service.service;
 
+import com.krzywdek19.product_service.dto.ProductStockResponse;
 import com.krzywdek19.product_service.model.Category;
 import com.krzywdek19.product_service.model.Product;
 import com.krzywdek19.product_service.mapper.ProductMapper;
@@ -175,19 +176,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean checkProductAvailability(List<Long> productIds) {
-        validateNotNull(productIds, "Product IDs list cannot be null");
-
-        if (productIds.isEmpty()) {
-            return true;
-        }
-
-        List<Product> products = getProductsWithValidation(productIds);
-        return products.stream().allMatch(product -> product.getQuantity() > 0);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<ProductResponseDTO> getProductsByIds(List<Long> productIds) {
         validateNotNull(productIds, "Product IDs list cannot be null");
 
@@ -197,6 +185,30 @@ public class ProductServiceImpl implements ProductService {
 
         List<Product> products = getProductsWithValidation(productIds);
         return mapToProductResponseDTOList(products);
+    }
+
+    @Override
+    public List<ProductStockResponse> checkProductsAvailability(List<Long> productIds) {
+        return productIds.stream()
+                .map(id -> {
+                    var product = productRepository.findById(id)
+                            .orElse(null);
+
+                    if (product == null) {
+                        return ProductStockResponse.builder()
+                                .productId(id)
+                                .inStock(false)
+                                .quantity(0)
+                                .build();
+                    }
+
+                    return ProductStockResponse.builder()
+                            .productId(id)
+                            .inStock(product.getQuantity() > 0)
+                            .quantity(product.getQuantity())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     private List<Product> getProductsWithValidation(List<Long> productIds) {

@@ -1,4 +1,4 @@
-package com.krzywdek19.order_service;
+package com.krzywdek19.order_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;

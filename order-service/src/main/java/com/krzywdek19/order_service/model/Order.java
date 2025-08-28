@@ -1,4 +1,4 @@
-package com.krzywdek19.order_service;
+package com.krzywdek19.order_service.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,4 +32,17 @@ public class Order {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLineItem> orderLineItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderStatusHistory> statusHistory = new ArrayList<>();
+
+    public void addStatusHistory(OrderStatus status, String comment) {
+        OrderStatusHistory history = OrderStatusHistory.builder()
+                .order(this)
+                .status(status)
+                .timestamp(LocalDateTime.now())
+                .comment(comment)
+                .build();
+        statusHistory.add(history);
+    }
 }
