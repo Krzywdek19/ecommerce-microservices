@@ -1,9 +1,6 @@
 package com.krzywdek19.product_service.controller;
 
-import com.krzywdek19.product_service.dto.ProductCreateDTO;
-import com.krzywdek19.product_service.dto.ProductResponseDTO;
-import com.krzywdek19.product_service.dto.ProductStockResponse;
-import com.krzywdek19.product_service.dto.ProductUpdateDTO;
+import com.krzywdek19.product_service.dto.*;
 import com.krzywdek19.product_service.model.Category;
 import com.krzywdek19.product_service.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -162,5 +159,18 @@ public class ProductController {
     })
     public ResponseEntity<List<ProductResponseDTO>> getProductsByIds(@RequestBody List<Long> productIds) {
         return ResponseEntity.ok(productService.getProductsByIds(productIds));
+    }
+
+    @PostMapping("/decrease-stock")
+    @Operation(summary = "Decrease product stock", description = "Decreases stock quantity for a list of products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Stock quantities successfully updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Insufficient stock")
+    })
+    public ResponseEntity<?> decreaseStock(@RequestBody List<ProductStockRequest> requests) {
+        productService.decreaseStock(requests);
+        return ResponseEntity.ok().build();
     }
 }

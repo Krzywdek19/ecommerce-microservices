@@ -1,13 +1,10 @@
 package com.krzywdek19.product_service.service;
 
-import com.krzywdek19.product_service.dto.ProductStockResponse;
+import com.krzywdek19.product_service.dto.*;
 import com.krzywdek19.product_service.model.Category;
 import com.krzywdek19.product_service.model.Product;
 import com.krzywdek19.product_service.mapper.ProductMapper;
 import com.krzywdek19.product_service.repository.ProductRepository;
-import com.krzywdek19.product_service.dto.ProductCreateDTO;
-import com.krzywdek19.product_service.dto.ProductResponseDTO;
-import com.krzywdek19.product_service.dto.ProductUpdateDTO;
 import com.krzywdek19.product_service.exception.ProductNotFoundException;
 import com.krzywdek19.product_service.exception.InsufficientStockException;
 import com.krzywdek19.product_service.exception.InvalidProductDataException;
@@ -209,6 +206,23 @@ public class ProductServiceImpl implements ProductService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    @Override
+    public void decreaseStock(List<ProductStockRequest> requests) {
+        for (ProductStockRequest request : requests) {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new ProductNotFoundException("Produkt o ID " + request.getProductId() + " nie został znaleziony"));
+
+            if (product.getQuantity() < request.getQuantity()) {
+                throw new InsufficientStockException(request.getProductId(), request.getQuantity(), product.getQuantity());
+            }
+
+            product.setQuantity(product.getQuantity() - request.getQuantity());
+            productRepository.save(product);
+        }
     }
 
     private List<Product> getProductsWithValidation(List<Long> productIds) {

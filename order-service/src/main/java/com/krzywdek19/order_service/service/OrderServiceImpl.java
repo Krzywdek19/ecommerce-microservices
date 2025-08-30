@@ -11,9 +11,12 @@ import com.krzywdek19.order_service.dto.OrderResponse;
 import com.krzywdek19.order_service.exception.InvalidOrderStatusException;
 import com.krzywdek19.order_service.exception.OrderNotFoundException;
 import com.krzywdek19.order_service.product.ProductClient;
+import com.krzywdek19.order_service.product.ProductStockRequest;
+import com.krzywdek19.order_service.product.ProductStockResponse;
 import com.krzywdek19.order_service.repository.OrderLineItemRepository;
 import com.krzywdek19.order_service.repository.OrderRepository;
-import com.krzywdek19.order_service.repository.OrderStatusRepository;
+import com.krzywdek19.order_service.repository.OrderStatusHistoryRepository;
+import com.krzywdek19.order_service.model.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,7 +32,7 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService{
     private final OrderRepository orderRepository;
     private final OrderLineItemRepository orderLineItemRepository;
-    private final OrderStatusRepository orderStatusRepository;
+    private final OrderStatusHistoryRepository orderStatusRepository;
     private final OrderStatusHistoryMapper orderStatusHistoryMapper;
     private final OrderLineItemMapper orderLineItemMapper;
     private final OrderMapper orderMapper;
@@ -37,12 +40,29 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public OrderResponse createOrder(OrderRequest orderRequest) {
-        List<Long> productIds = orderRequest.getOrderLineItems().stream()
+        List<Long> productIds = extractProductIds(orderRequest);
+        List<ProductStockResponse> productsInStock = checkProductsAvailability(productIds);
+        validateProductAvailability(orderRequest, productsInStock);
+
+        Order order = prepareOrder(orderRequest);
+        Order savedOrder = saveOrder(order);
+
+        updateProductStock(orderRequest);
+
+        return orderMapper.toOrderResponse(savedOrder);
+    }
+
+    private List<Long> extractProductIds(OrderRequest orderRequest) {
+        return orderRequest.getOrderLineItems().stream()
                 .map(OrderLineItemRequest::getProductId)
                 .toList();
+    }
 
-        var productsInStock = productClient.checkProductsAvailability(productIds);
+    private List<ProductStockResponse> checkProductsAvailability(List<Long> productIds) {
+        return productClient.checkProductsAvailability(productIds);
+    }
 
+    private void validateProductAvailability(OrderRequest orderRequest, List<ProductStockResponse> productsInStock) {
         for(var lineItem : orderRequest.getOrderLineItems()) {
             var productStock = productsInStock.stream()
                     .filter(p -> p.getProductId().equals(lineItem.getProductId()))
@@ -53,17 +73,28 @@ public class OrderServiceImpl implements OrderService{
                 throw new ProductNotFoundException("Product with ID " + lineItem.getProductId() + " is out of stock or insufficient quantity");
             }
         }
+    }
 
+    private Order prepareOrder(OrderRequest orderRequest) {
         var order = orderMapper.requestToOrder(orderRequest);
-
         order.setOrderNumber(generateOrderNumber());
         order.setOrderStatus(OrderStatus.CREATED);
         order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
 
+    private Order saveOrder(Order order) {
         var savedOrder = orderRepository.save(order);
-        savedOrder.addStatusHistory(savedOrder.getOrderStatus(),"Order created");
+        savedOrder.addStatusHistory(savedOrder.getOrderStatus(), "Order created");
+        return orderRepository.save(savedOrder);
+    }
 
-        return orderMapper.toOrderResponse(orderRepository.save(savedOrder));
+    private void updateProductStock(OrderRequest orderRequest) {
+        List<ProductStockRequest> stockUpdates = orderRequest.getOrderLineItems().stream()
+                .map(item -> new ProductStockRequest(item.getProductId(), item.getQuantity()))
+                .toList();
+
+        productClient.decreaseStock(stockUpdates);
     }
 
     private String generateOrderNumber() {

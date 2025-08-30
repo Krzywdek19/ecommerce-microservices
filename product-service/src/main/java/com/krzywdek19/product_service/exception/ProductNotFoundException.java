@@ -10,6 +10,6 @@ public class ProductNotFoundException extends RuntimeException {
     }
 
     public ProductNotFoundException(Long id) {
-        super("Produkt o ID " + id + " nie został znaleziony");
+        super("Product With ID " + id + " has not been found");
     }
 }

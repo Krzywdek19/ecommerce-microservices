@@ -1,10 +1,7 @@
 package com.krzywdek19.product_service.service;
 
-import com.krzywdek19.product_service.dto.ProductStockResponse;
+import com.krzywdek19.product_service.dto.*;
 import com.krzywdek19.product_service.model.Category;
-import com.krzywdek19.product_service.dto.ProductCreateDTO;
-import com.krzywdek19.product_service.dto.ProductResponseDTO;
-import com.krzywdek19.product_service.dto.ProductUpdateDTO;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -24,4 +21,5 @@ public interface ProductService {
     List<ProductResponseDTO> getRecentlyAddedProducts(int limit);
     List<ProductResponseDTO> getProductsByIds(List<Long> productIds);
     List<ProductStockResponse> checkProductsAvailability(List<Long> productIds);
+    void decreaseStock(List<ProductStockRequest> productStockRequests);
 }
